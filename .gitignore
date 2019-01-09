@@ -1,5 +1,6 @@
 # Config Files for this project
 config.ini 
+_config.yml
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
