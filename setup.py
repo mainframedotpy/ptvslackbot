@@ -20,6 +20,17 @@ def setuphandler(config_loc):
         # File exists so check for valid config
         configvalidation(config_loc)
 
+def fetchauth(config_loc, inheader):
+    """
+    Given a config file and specified header,
+    """
+    # Read config file
+    config = configparser.ConfigParser()
+    config.read(config_loc)
+
+    # set up a config dictionary for output
+    return config
+
 
 def filecheck(config_loc):
     """

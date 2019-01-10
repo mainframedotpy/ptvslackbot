@@ -7,11 +7,16 @@ ptv_key = ''
 config_loc = 'config/config.ini'
 
 # Verify config exists and has valid contents
-setup.setuphandler(config_loc)
+if setup.setuphandler(config_loc) == False:
+    print("No valid config found")
+else:
+    print("Config Found")
 
+# Fetch credentials for PTV
+config = setup.fetchauth(config_loc, 'PTV')
 
 # Establish a new session
-# connection = PTVAPIClass(ptv_devid, ptv_key)
+connection = PTVAPIClass(config['PTV']['ptv_devid'], config['PTV']['ptv_key'])
 
 # Dummy sections
 # print(connection.routes)
