@@ -8,12 +8,10 @@ import setup
 config_loc = 'config/config.ini'
 config = setup.fetchauth(config_loc, 'SLACK')
 slack_client = SlackClient(config['SLACK']['bot_token'])
-
-
 # RTM read delay
 rtm_read_delay = 1
-
 commandlist = ['!status', '!help', '!halp']
+
 
 def parse_messages(slack_events):
     # Loop through all incoming events
@@ -49,12 +47,16 @@ def bot_setup():
     return BotID, BotName, BotChannels, Bot_Mention
 
 
-def bot_response(channel, message):
-    slack_client.api_call("chat.postMessage", channel=channel, text=message)
+
 
 def process_message(message, channel, dm_flag=False, user=None):
     if dm_flag == True:
         print(str(user), message)
+
+
+def bot_response(channel, message):
+    # Post a plaintext message
+    slack_client.api_call("chat.postMessage", channel=channel, text=message)
 
 
 
