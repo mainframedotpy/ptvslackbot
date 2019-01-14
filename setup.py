@@ -19,6 +19,7 @@ def setuphandler(config_loc):
     else:
         # File exists so check for valid config
         configvalidation(config_loc)
+        return True
 
 def fetchauth(config_loc, inheader):
     """
