@@ -2,11 +2,11 @@
 import os
 import time
 from slackclient import SlackClient
-import setup
+import configuration
 
 # Get config from file and start bot
 config_loc = 'config/config.ini'
-config = setup.fetchauth(config_loc, 'SLACK')
+config = configuration.fetchauth(config_loc, 'SLACK')
 slack_client = SlackClient(config['SLACK']['bot_token'])
 # RTM read delay
 rtm_read_delay = 1
@@ -46,12 +46,15 @@ def parse_messages(slack_events):
             if event['text'].startswith(Bot_Mention) == True:
                 return event, True 
             # else, if the message is a command, process normal commands
-            elif event['text'].startswith(any(x for x in commandlist)):
+            elif event['text'].startswith(tuple(commandlist)):
                 return event, False
     return None, None
 
 
 def process_message(event, dm_flag=False):
+    # Initialise a reply
+    reply = {}
+    # Check for a DM
     if dm_flag == True:
         # DM Processing goes here
         # Dummy for now
@@ -79,7 +82,7 @@ def bot_response(event):
         slack_client.api_call("chat.postMessage", 
                             channel=event['channel'],
                             text=event['text'],
-                            ts=event['ts']
+                            thread_ts=event['ts']
                             )
     else:
         slack_client.api_call("chat.postMessage", 
@@ -99,7 +102,8 @@ if __name__ == "__main__":
             event, flag = parse_messages(slack_client.rtm_read())
             if event != None:
                 out_message = process_message(event, flag)
-                        
+                bot_response(out_message)
+
             time.sleep(rtm_read_delay)
 
     # If bot can't connect, print error
