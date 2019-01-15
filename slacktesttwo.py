@@ -26,7 +26,8 @@ def bot_setup():
 
     print(Bot_Mention, 'is my keyword')
 
-    reply[text] = message
+    reply = {}
+    reply['text'] = message
     for channel in BotChannels:
         reply['channel'] = channel['id']
         bot_response(reply)
@@ -47,7 +48,7 @@ def parse_messages(slack_events):
             # else, if the message is a command, process normal commands
             elif event['text'].startswith(any(x for x in commandlist)):
                 return event, False
-    return None
+    return None, None
 
 
 def process_message(event, dm_flag=False):
@@ -74,7 +75,7 @@ def process_message(event, dm_flag=False):
     
 
 def bot_response(event):
-    if event['ts']:
+    if 'ts' in event:
         slack_client.api_call("chat.postMessage", 
                             channel=event['channel'],
                             text=event['text'],
@@ -96,9 +97,9 @@ if __name__ == "__main__":
         # Start listen loop 
         while True:
             event, flag = parse_messages(slack_client.rtm_read())
-            out_message = process_message(event, flag)
-            
-            
+            if event != None:
+                out_message = process_message(event, flag)
+                        
             time.sleep(rtm_read_delay)
 
     # If bot can't connect, print error
