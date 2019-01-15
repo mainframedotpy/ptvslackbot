@@ -13,21 +13,6 @@ rtm_read_delay = 1
 commandlist = ['!status', '!help', '!halp']
 
 
-def parse_messages(slack_events):
-    # Loop through all incoming events
-    for event in slack_events:
-        # Only do anything if this is a message
-        if event['type'] == 'message' and not "subtype" in event:
-            # Print messages to console for debug purposes
-            print(event['type'], '||', event['channel'], '||', event['text'])
-            # If message is a DM, do DM processing
-            if event['text'].startswith(Bot_Mention) == True:
-                process_message(event['text'], event['channel'], True, event['user'])
-            # else, if the message is a command, process normal commands
-            elif event['text'].startswith(tuple(commandlist)):
-                process_message(event['text'], event['channel'])
-    return None
-
 def bot_setup():
     # Get bot info
     BotID = slack_client.api_call("auth.test")["user_id"]
@@ -47,28 +32,73 @@ def bot_setup():
     return BotID, BotName, BotChannels, Bot_Mention
 
 
+def parse_messages(slack_events):
+    # Loop through all incoming events
+    for event in slack_events:
+        # Only do anything if this is a message
+        if event['type'] == 'message' and not "subtype" in event:
+            # Print messages to console for debug purposes
+            print(event['type'], '||', event['user'], event['channel'], '||', event['text'])
+            # If message is a DM, do DM processing
+            if event['text'].startswith(Bot_Mention) == True:
+                return event, True 
+            # else, if the message is a command, process normal commands
+            elif event['text'].startswith(any(x for x in commandlist)):
+                return event, False
+    return None
 
 
-def process_message(message, channel, dm_flag=False, user=None):
+def process_message(event, dm_flag=False):
     if dm_flag == True:
-        print(str(user), message)
+        # DM Processing goes here
+        # Dummy for now
+        reply['text'] = 'Hello {}, I am a usless bot'.format(event['user'])
+        reply['channel'] = event['channel']
+        reply['ts'] = event['ts']
+        
+        return reply
+    
+    else:
+        reply['channel']  = event['channel'] 
+        
+        if event['text'].startswith('!status'):
+            reply['text'] = 'There are no trains today'
+        elif event['text'].startswith('!halp'):
+            reply['text'] = '(╯°□°）╯︵ ┻━┻'    
+        else:
+            reply['text'] = 'botbotbotbotbot'
+        return reply
+        
+    
 
-
-def bot_response(channel, message):
-    # Post a plaintext message
-    slack_client.api_call("chat.postMessage", channel=channel, text=message)
+def bot_response(event):
+    if event['ts']:
+        slack_client.api_call("chat.postMessage", 
+                            channel=event['channel'],
+                            text=event['text'],
+                            ts=event['ts']
+                            )
+    else:
+        slack_client.api_call("chat.postMessage", 
+                            channel=event['channel'],   
+                            text=event['text']
+                            )
 
 
 
 if __name__ == "__main__":
     if slack_client.rtm_connect(with_team_state=False):
-        # Get bot info
+        # Set up the bot and get bot info
         BotID, BotName, BotChannels, Bot_Mention = bot_setup()
-
+        
+        # Start listen loop 
         while True:
-            x = parse_messages(slack_client.rtm_read())
+            event, flag = parse_messages(slack_client.rtm_read())
+            out_message = process_message(event, flag)
+            
+            
             time.sleep(rtm_read_delay)
 
-
+    # If bot can't connect, print error
     else:
         print("Connection failed")
