@@ -46,7 +46,7 @@ def parse_messages(slack_events):
             if event['text'].startswith(Bot_Mention) == True:
                 return event, True 
             # else, if the message is a command, process normal commands
-            elif event['text'].startswith(any(x for x in commandlist)):
+            elif event['text'].startswith(tuple(commandlist)):
                 return event, False
     return None, None
 
