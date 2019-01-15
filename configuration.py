@@ -12,7 +12,6 @@ def setuphandler(config_loc):
         True/False - A bool value representing succesful completion
     """
     if filecheck(config_loc) == False:
-        # If no file, build a skeleton to be modified before next run
         # Return false to end setup
         buildskel(config_loc)
         return False

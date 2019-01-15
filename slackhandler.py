@@ -4,10 +4,6 @@ import time
 from slackclient import SlackClient
 import configuration
 
-# Get config from file and start bot
-config_loc = 'config/config.ini'
-config = configuration.fetchauth(config_loc, 'SLACK')
-slack_client = SlackClient(config['SLACK']['bot_token'])
 # RTM read delay
 rtm_read_delay = 1
 commandlist = ['!status', '!help', '!halp']

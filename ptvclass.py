@@ -2,7 +2,6 @@ from hashlib import sha1
 import hmac
 import requests
 
-
 class PTVAPIClass():
     """A wrapper for the Melbourne PTV API"""
 
@@ -16,6 +15,7 @@ class PTVAPIClass():
         self.key = key
         self.routes = {}
         self.refreshlines()
+        self.age = 
         
     def getsigurl(self, request):
         # Define constants for request url
