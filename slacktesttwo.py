@@ -26,8 +26,10 @@ def bot_setup():
 
     print(Bot_Mention, 'is my keyword')
 
+    reply[text] = message
     for channel in BotChannels:
-        bot_response(channel['id'], message)
+        reply['channel'] = channel['id']
+        bot_response(reply)
 
     return BotID, BotName, BotChannels, Bot_Mention
 
