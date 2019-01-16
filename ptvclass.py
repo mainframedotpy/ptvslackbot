@@ -1,6 +1,7 @@
 from hashlib import sha1
 import hmac
 import requests
+import datetime
 
 class PTVAPIClass():
     """A wrapper for the Melbourne PTV API"""
@@ -15,7 +16,7 @@ class PTVAPIClass():
         self.key = key
         self.routes = {}
         self.refreshlines()
-        self.age = 
+        self.age = datetime.datetime.now()
         
     def getsigurl(self, request):
         # Define constants for request url
@@ -55,3 +56,16 @@ class PTVAPIClass():
             apiurl = apibase + 'disruptions?disruption_modes=1'
 
         return apiurl
+
+    
+    def checkage(self):
+        """
+        Check if the age of our data is > 15 minutes
+        Return:
+        True - Less than 15 minutes old
+        False - More than 15 minutes old
+        """
+        if self.age < datetime.datetime.now() - datetime.timedelta(minutes = 10):
+            return True
+        else:
+            return False
