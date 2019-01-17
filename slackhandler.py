@@ -9,12 +9,12 @@ rtm_read_delay = 1
 commandlist = ['!status', '!help', '!halp']
 
 
-def bot_setup():
+def bot_setup(bothandle):
     # Get bot info
-    BotID = slack_client.api_call("auth.test")["user_id"]
-    BotName = slack_client.api_call("auth.test")["user"]
+    BotID = bothandle.api_call("auth.test")["user_id"]
+    BotName = bothandle.api_call("auth.test")["user"]
     print("Bot {} connected as {}".format(BotName, BotID))
-    BotChannels = slack_client.api_call("users.conversations",
+    BotChannels = bothandle.api_call("users.conversations",
                                         types='private_channel')['channels']
     # Send out an online message to bot channels        
     message = 'PTV Bot Connected'
@@ -26,12 +26,12 @@ def bot_setup():
     reply['text'] = message
     for channel in BotChannels:
         reply['channel'] = channel['id']
-        bot_response(reply)
+        bot_response(bothandle, reply)
 
     return BotID, BotName, BotChannels, Bot_Mention
 
 
-def parse_messages(slack_events):
+def parse_messages(slack_events, BotID, Bot_Mention):
     # Loop through all incoming events
     for event in slack_events:
         # Only do anything if this is a message
@@ -47,7 +47,7 @@ def parse_messages(slack_events):
     return None, None
 
 
-def process_message(event, dm_flag=False):
+def process_message(event, routes, dm_flag=False):
     # Initialise a reply
     reply = {}
     # Check for a DM
@@ -62,9 +62,16 @@ def process_message(event, dm_flag=False):
     
     else:
         reply['channel']  = event['channel'] 
-        
-        if event['text'].startswith('!status'):
-            reply['text'] = 'There are no trains today'
+        if event['text'].strip() == "!status":
+            reply['text'] = ''
+            for i in routes:
+                reply['text'] += "*{}*: {}\n".format(i, routes[i]['Status'])
+        elif event['text'].startswith('!status'):
+            line = event['text'][8:].strip()
+            if line.lower() in [k.lower() for k in routes.keys()]:
+                reply['text'] = "*{}*: {}".format(line.title(), routes[line.title()]['Status_Long'])
+            else:
+                reply['text'] = "Not a valid line"
         elif event['text'].startswith('!halp'):
             reply['text'] = '(╯°□°）╯︵ ┻━┻'    
         else:
@@ -73,15 +80,15 @@ def process_message(event, dm_flag=False):
         
     
 
-def bot_response(event):
+def bot_response(bothandle, event):
     if 'ts' in event:
-        slack_client.api_call("chat.postMessage", 
+        bothandle.api_call("chat.postMessage", 
                             channel=event['channel'],
                             text=event['text'],
                             thread_ts=event['ts']
                             )
     else:
-        slack_client.api_call("chat.postMessage", 
+        bothandle.api_call("chat.postMessage", 
                             channel=event['channel'],   
                             text=event['text']
                             )

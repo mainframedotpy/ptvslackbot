@@ -68,7 +68,7 @@ class PTVAPIClass():
                 long = 'Upcoming planned outages'
             else:
                 short = "Delays"
-                long = "New feature goes here"
+                long = subdict['title']
         
         return short, long
 
